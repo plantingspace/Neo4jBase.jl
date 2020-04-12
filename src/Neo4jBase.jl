@@ -1,5 +1,7 @@
 module Neo4jBase
 
+export Connection, commit
+
 using HTTP, JSON3, StructTypes, Base64
 
 endpoint(host::String, port::Int) =
