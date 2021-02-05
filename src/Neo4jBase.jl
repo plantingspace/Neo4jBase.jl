@@ -52,7 +52,7 @@ end
 Statements(sts::String...) = Statements(collect(map(Statement, sts)))
 StructTypes.StructType(::Type{Statements}) = StructTypes.Struct()
 
-commit(conn::Connection, sts::Statements)::Union{JSON3.Object, Nothing, String} =
+commit(conn::Connection, sts::Statements)::Union{JSON3.Object, Nothing} =
   try  
     result =   HTTP.post(
       string(conn.endpoint, "/commit"),
