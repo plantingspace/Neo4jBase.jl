@@ -30,10 +30,14 @@ Connection(;
 
 parse(response::HTTP.Messages.Response)::JSON3.Object = JSON3.read(response.body)
 
-root_discovery(host::String, port::Int)::JSON3.Object =
-  endpoint(host, port) |>
-  HTTP.get |>
-  parse
+root_discovery(host::String, port::Int)::Union{JSON3.Object, Nothing} =
+  try
+    result = endpoint(host, port) |>
+     HTTP.get |> parse
+  catch e
+    @error "Couldn not establish a Neo4j connection, host returned the following 
+            $(sprint(showerror, e))"
+  end
 
 struct Statement
   statement::String
@@ -48,11 +52,23 @@ end
 Statements(sts::String...) = Statements(collect(map(Statement, sts)))
 StructTypes.StructType(::Type{Statements}) = StructTypes.Struct()
 
-commit(conn::Connection, sts::Statements)::JSON3.Object =
-  HTTP.post(
-    string(conn.endpoint, "/commit"),
-    conn.headers,
-    JSON3.write(sts)) |> parse
+commit(conn::Connection, sts::Statements)::Union{JSON3.Object, Nothing, String} =
+  try  
+    result =   HTTP.post(
+      string(conn.endpoint, "/commit"),
+      conn.headers,
+      JSON3.write(sts)) |> parse 
+  
+    if !isempty(result[:errors])
+      error(result[:errors])
+    else
+      result
+    end
+  catch
+    @error "Host returned the following error,
+            $(sprint(showerror, e))"
+  end
+
 commit(conn::Connection, st::String)::JSON3.Object =
   commit(conn, Statements(st))
 
