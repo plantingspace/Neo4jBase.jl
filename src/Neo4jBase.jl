@@ -62,7 +62,7 @@ commit(conn::Connection, sts::Statements)::Union{JSON3.Object, Nothing} =
     if !isempty(result[:errors])
       error(result[:errors])
     else
-      result
+      return result
     end
   catch
     @error "Host returned the following error,
