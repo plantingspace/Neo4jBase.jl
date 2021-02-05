@@ -8,10 +8,10 @@ More functionality and documentation may come later, PRs welcome.
 
 # API Referece
 ### `Connection(;host::String, port::Int, db::String, username::String, password::String)`
-Defines the Neo4j database connection.
+Defines the Neo4j database connection. If keyword arguments are not specified, connection to default local database is created. Returns `nothing` if there was an issue connecting.
 
 ### `commit(conn::Connection, query::String)`
-Commit the Cypher query to the database.
+Commit the Cypher query to the database and get the results or `nothing` if an error occured.
 
 ### `Neo4jBase.root_discovery(host::String, port::Int)`
 Fetches a list of other Neo4j URIs, as well as version information of the server.
