@@ -10,8 +10,8 @@ More functionality and documentation may come later, PRs welcome.
 ### `Connection(;host::String, port::Int, db::String, username::String, password::String)`
 Defines the Neo4j database connection.
 
-### `commit(conn::Connection, st::String)`
-Commit the changes to the database, where `st` indicates the `Cypher Query`.
+### `commit(conn::Connection, query::String)`
+Commit the Cypher query to the database.
 
 ### `Neo4jBase.root_discovery(host::String, port::Int)`
-Fetches a list of other URIs, as well as version information of the server.
+Fetches a list of other Neo4j URIs, as well as version information of the server.
