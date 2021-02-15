@@ -69,7 +69,7 @@ commit(conn::Connection, sts::Statements)::Union{JSON3.Array, Nothing} =
             $(sprint(showerror, e))"
   end
 
-commit(conn::Connection, st::String)::JSON3.Object =
+commit(conn::Connection, st::String)::Union{JSON3.Array, Nothing} =
   commit(conn, Statements(st))
 
 end
