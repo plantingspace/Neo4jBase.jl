@@ -62,9 +62,9 @@ commit(conn::Connection, sts::Statements)::Union{JSON3.Object, Nothing} =
     if !isempty(result[:errors])
       error(result[:errors])
     else
-      return result
+      return result[:results]
     end
-  catch
+  catch e
     @error "The Neo4j database host returned the following error,
             $(sprint(showerror, e))"
   end
