@@ -4,10 +4,10 @@ export Connection, commit
 
 using HTTP, JSON3, StructTypes, Base64
 
-endpoint(host::String, port::Int) =
-  string("http://", host, ":", port)
-endpoint(host::String, port::Int, db::String) =
-  string(endpoint(host, port), "/db/", db, "/tx")
+endpoint(host::String, port::Int; use_https::Bool = false) =
+  string("http", use_https ? "s" : "", "://", host, ":", port)
+endpoint(host::String, port::Int, db::String; use_https::Bool = false) =
+  string(endpoint(host, port; use_https), "/db/", db, "/tx")
 
 headers(username::String, password::String) = Dict(
   "Accept" => "application/json; charset=UTF-8",
@@ -18,22 +18,24 @@ headers(username::String, password::String) = Dict(
 struct Connection
   endpoint::String
   headers::Dict{String, String}
+  config::NamedTuple
 end
 Connection(;
   host::String="localhost",
   port::Int=7474,
   db::String="neo4j",
   username::String="neo4j",
-  password::String="neo4j"
+  password::String="neo4j",
+  use_https::Bool = false,
+  config...
   ) =
-  Connection(endpoint(host, port, db), headers(username, password))
+  Connection(endpoint(host, port, db; use_https), headers(username, password), NamedTuple(config))
 
 parse(response::HTTP.Messages.Response)::JSON3.Object = JSON3.read(response.body)
 
-root_discovery(host::String, port::Int)::Union{JSON3.Object, Nothing} =
+root_discovery(host::String, port::Int; config...)::Union{JSON3.Object, Nothing} =
   try
-    result = endpoint(host, port) |>
-     HTTP.get |> parse
+    result = HTTP.get(endpoint(host, port); config...) |> parse
   catch e
     @error "Couldn not establish a Neo4j connection, host returned the following 
             $(sprint(showerror, e))"
@@ -57,7 +59,7 @@ commit(conn::Connection, sts::Statements)::Union{JSON3.Array, Nothing} =
     result =   HTTP.post(
       string(conn.endpoint, "/commit"),
       conn.headers,
-      JSON3.write(sts)) |> parse 
+      JSON3.write(sts); conn.config...) |> parse
   
     if !isempty(result[:errors])
       error(result[:errors])
