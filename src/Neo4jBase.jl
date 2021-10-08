@@ -1,6 +1,6 @@
 module Neo4jBase
 
-export Connection, commit
+export Connection, commit, isavailable, root_discovery
 
 using HTTP, JSON3, StructTypes, Base64
 
@@ -40,6 +40,23 @@ root_discovery(host::String, port::Int; config...)::Union{JSON3.Object, Nothing}
     @error "Couldn not establish a Neo4j connection, host returned the following 
             $(sprint(showerror, e))"
   end
+
+"""
+Check whether `conn` points to an available server with a default timeout of 5 seconds.
+
+A custom timeout can be provided (in seconds) and will be disabled if set to zero.
+"""
+function isavailable(conn::Connection; timeout::Integer = 5)
+  # just keep method://host:port
+  endpoint = conn.endpoint[1:first(findfirst("/db", conn.endpoint))]
+  try
+    result = HTTP.get(endpoint, conn.headers; conn.config..., connect_timeout = timeout) |> parse
+    true
+  catch e
+    !isa(e, HTTP.ConnectionPool.ConnectTimeout) && rethrow(e)
+    return false
+  end
+end
 
 struct Statement
   statement::String
