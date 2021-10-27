@@ -37,7 +37,7 @@ root_discovery(host::String, port::Int; config...)::Union{JSON3.Object, Nothing}
   try
     result = HTTP.get(endpoint(host, port); config...) |> parse
   catch e
-    @error "Could not establish a Neo4j connection, host returned the following $(sprint(showerror, e))"
+    @debug "Could not establish a Neo4j connection, host returned the following $(sprint(showerror, e))"
   end
 
 """
@@ -53,7 +53,7 @@ function isavailable(conn::Connection; timeout::Integer = 5)
     true
   catch e
     if !isa(e, HTTP.ConnectionPool.ConnectTimeout)
-      @error "Trying to connect to a database at $endpoint returned an error: $(sprint(showerror, e))"
+      @debug "Trying to connect to a database at $endpoint returned an error: $(sprint(showerror, e))"
     end
     return false
   end
