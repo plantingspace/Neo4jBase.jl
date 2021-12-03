@@ -73,20 +73,19 @@ Statements(sts::String...) = Statements(collect(map(Statement, sts)))
 StructTypes.StructType(::Type{Statements}) = StructTypes.Struct()
 
 commit(conn::Connection, sts::Statements)::Union{JSON3.Array, Nothing} =
-  try  
-    result =   HTTP.post(
+  try
+    result = HTTP.post(
       string(conn.endpoint, "/commit"),
       conn.headers,
       JSON3.write(sts); conn.config...) |> parse
-  
+
     if !isempty(result[:errors])
       error(result[:errors])
     else
       return result[:results]
     end
   catch e
-    @error "The Neo4j database host returned the following error,
-            $(sprint(showerror, e))"
+    @error "The Neo4j database host returned the following error" exception = first(Base.catch_stack())
   end
 
 commit(conn::Connection, st::String)::Union{JSON3.Array, Nothing} =
