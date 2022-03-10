@@ -85,7 +85,7 @@ commit(conn::Connection, sts::Statements)::Union{JSON3.Array, Nothing} =
       return result[:results]
     end
   catch e
-    @error "The Neo4j database host returned the following error" exception = first(Base.catch_stack())
+    @error "The Neo4j database host returned the following error" exception = (e, backtrace())
   end
 
 commit(conn::Connection, st::String)::Union{JSON3.Array, Nothing} =
