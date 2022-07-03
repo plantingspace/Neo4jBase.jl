@@ -73,7 +73,7 @@ Statements(sts::String...) = Statements(collect(map(Statement, sts)))
 StructTypes.StructType(::Type{Statements}) = StructTypes.Struct()
 
 function commit(conn::Connection, sts::Statements)::Union{JSON3.Array,Nothing}
-  result = HTTP.post(string(conn.endpoint, "/commit"), conn.headers, JSON3.write(sts); conn.config...) |> parse
+  result = HTTP.post(string(conn.endpoint, "/commit"), conn.headers, JSON3.write(sts), retry_non_idempotent = true; conn.config...) |> parse
   !isempty(result[:errors]) && error(result[:errors])
   result[:results]
 end
